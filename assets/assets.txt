@@ -1,0 +1,16 @@
+data/BoomBox.bin
+data/BoomBox.gltf
+data/BoomBox_baseColor.png
+data/BoomBox_emissive.png
+data/BoomBox_normal.png
+data/BoomBox_occlusionRoughnessMetallic.png
+data/chicago.glb
+data/chicago2.glb
+data/color.fragment.glsl
+data/color.vertex.glsl
+data/invader.png
+data/invaderscene.g3db
+data/ok2.glb
+data/ship.png
+data/space.jpg
+libgdx.png
