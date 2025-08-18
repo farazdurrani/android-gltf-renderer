@@ -3,6 +3,7 @@ package com.faraz.libgdx;
 import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
@@ -64,13 +65,13 @@ public class Main2 implements ApplicationListener {
         environment.add(light);
 
         cam = new PerspectiveCamera(67, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-        cam.position.set(0f, 6500f, 0f);
+        cam.position.set(0f, 5100f, 3000f);
         cam.lookAt(0, 0, 0);
         cam.near = 0.1f;
         cam.far = 30000f;
         cam.update();
 
-        camController = new CameraInputController(cam);
+        camController = new CustomCameraInputController(cam);
         Gdx.input.setInputProcessor(camController);
 
         assets = new AssetManager();
@@ -87,25 +88,40 @@ public class Main2 implements ApplicationListener {
         Model model = assets.get(data, SceneAsset.class).scene.model;
         for (int i = 0; i < model.nodes.size; i++) {
             String id = model.nodes.get(i).id;
-//            GameObject instance = new GameObject(model, id, true);
             instances.add(new ModelInstance(model, id));
         }
         loading = false;
     }
 
+    protected boolean isVisible(final Camera cam, final ModelInstance instance) {
+        instance.transform.getTranslation(position);
+        return cam.frustum.pointInFrustum(position);
+    }
+
+
     @Override
     public void render() {
-        if (loading && assets.update())
+        if (loading && assets.update()) {
             doneLoading();
+        }
         camController.update();
 
         Gdx.gl.glViewport(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
+//        todo experimental
+//        Gdx.gl.glClearColor(0f, 0f, 0f, 1f);
+//        Gdx.gl.glEnable(GL_DEPTH_TEST);
+//        Gdx.gl.glCullFace(GL_CULL_FACE);
 
+//        modelBatch.getRenderContext().setDepthTest(GL20.GL_LEQUAL);
+//        modelBatch.getRenderContext().setCullFace(GL20.GL_BACK);
+//        todo experimental
         modelBatch.begin(cam);
         visibleCount = 0;
         for (final ModelInstance instance : instances) {
-            modelBatch.render(instance, environment);
+            if (isVisible(cam, instance)) {
+                modelBatch.render(instance, environment);
+            }
             visibleCount++;
         }
 
