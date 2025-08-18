@@ -16,6 +16,6 @@ public class AndroidLauncher extends AndroidApplication {
         super.onCreate(savedInstanceState);
         AndroidApplicationConfiguration configuration = new AndroidApplicationConfiguration();
         configuration.useImmersiveMode = true; // Recommended, but not required.
-        initialize(new Main2(), configuration);
+        initialize(new GLTFQuickStartExample(), configuration);
     }
 }

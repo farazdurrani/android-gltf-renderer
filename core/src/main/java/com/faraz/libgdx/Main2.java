@@ -12,53 +12,40 @@ import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
-import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
 import com.badlogic.gdx.graphics.g3d.utils.CameraInputController;
 import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.utils.Array;
 
 import net.mgsx.gltf.loaders.glb.GLBAssetLoader;
 import net.mgsx.gltf.loaders.gltf.GLTFAssetLoader;
+import net.mgsx.gltf.scene3d.lights.DirectionalLightEx;
 import net.mgsx.gltf.scene3d.scene.SceneAsset;
 
-/** See: http://blog.xoppa.com/3d-frustum-culling-with-libgdx
- * @author Xoppa */
+/**
+ * See: http://blog.xoppa.com/3d-frustum-culling-with-libgdx
+ *
+ * @author Xoppa
+ */
 public class Main2 implements ApplicationListener {
-    public static class GameObject extends ModelInstance {
-        public final Vector3 center = new Vector3();
-        public final Vector3 dimensions = new Vector3();
-        public final float radius;
-
-        private final static BoundingBox bounds = new BoundingBox();
-
-        public GameObject(Model model, String rootNode, boolean mergeTransform) {
-            super(model, rootNode, mergeTransform);
-            calculateBoundingBox(bounds);
-            bounds.getCenter(center);
-            bounds.getDimensions(dimensions);
-            radius = dimensions.len() / 2f;
-        }
-    }
-
+    public static final String[] fileExtension = {"glb", "gltf"};
+    public static final String filename = "Grinnell_Lake." + fileExtension[0];
+    private final String data = "/home/faraz/Android/code-workspace/libgdx-tutorial/assets/data/" + filename;
+    private final Vector3 position = new Vector3();
     protected PerspectiveCamera cam;
     protected CameraInputController camController;
     protected ModelBatch modelBatch;
     protected AssetManager assets;
-    protected Array<GameObject> instances = new Array<>();
+    protected Array<ModelInstance> instances = new Array<>();
     protected Environment environment;
     protected boolean loading;
-
-    protected ModelInstance space;
-
     protected Stage stage;
     protected Label label;
     protected BitmapFont font;
     protected StringBuilder stringBuilder;
-
-    private String data = "/home/faraz/Android/code-workspace/libgdx-tutorial/assets/data";
+    private int visibleCount;
+    private DirectionalLightEx light;
 
     @Override
     public void create() {
@@ -70,13 +57,16 @@ public class Main2 implements ApplicationListener {
 
         modelBatch = new ModelBatch();
         environment = new Environment();
-        environment.set(new ColorAttribute(ColorAttribute.AmbientLight, 0.4f, 0.4f, 0.4f, 1f));
-        environment.add(new DirectionalLight().set(0.8f, 0.8f, 0.8f, -1f, -0.8f, -0.2f));
+        environment.set(new ColorAttribute(ColorAttribute.AmbientLight, 1f, 1f, 1f, 1f));
+        light = new DirectionalLightEx();
+        light.direction.set(1, -3, 1).nor();
+        light.color.set(Color.WHITE);
+        environment.add(light);
 
-        cam = new PerspectiveCamera(90, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-        cam.position.set(0f, 1000f, 2000f);
+        cam = new PerspectiveCamera(67, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        cam.position.set(0f, 6500f, 0f);
         cam.lookAt(0, 0, 0);
-        cam.near = 1f;
+        cam.near = 0.1f;
         cam.far = 30000f;
         cam.update();
 
@@ -84,23 +74,24 @@ public class Main2 implements ApplicationListener {
         Gdx.input.setInputProcessor(camController);
 
         assets = new AssetManager();
-//        assets.setLoader(SceneAsset.class, ".gltf", new GLTFAssetLoader());
-        assets.setLoader(SceneAsset.class, ".glb", new GLBAssetLoader());
-        assets.load(data + "/ok2.glb", SceneAsset.class);
+        if (data.endsWith(".gltf")) {
+            assets.setLoader(SceneAsset.class, ".gltf", new GLTFAssetLoader());
+        } else {
+            assets.setLoader(SceneAsset.class, data, new GLBAssetLoader());
+        }
+        assets.load(data, SceneAsset.class);
         loading = true;
     }
 
     private void doneLoading() {
-        Model model = assets.get(data + "/ok2.glb", SceneAsset.class).scene.model;
+        Model model = assets.get(data, SceneAsset.class).scene.model;
         for (int i = 0; i < model.nodes.size; i++) {
             String id = model.nodes.get(i).id;
-            GameObject instance = new GameObject(model, id, true);
-            instances.add(instance);
+//            GameObject instance = new GameObject(model, id, true);
+            instances.add(new ModelInstance(model, id));
         }
         loading = false;
     }
-
-    private int visibleCount;
 
     @Override
     public void render() {
@@ -113,14 +104,11 @@ public class Main2 implements ApplicationListener {
 
         modelBatch.begin(cam);
         visibleCount = 0;
-        for (final GameObject instance : instances) {
-            if (isVisible(cam, instance)) {
-                modelBatch.render(instance, environment);
-                visibleCount++;
-            }
+        for (final ModelInstance instance : instances) {
+            modelBatch.render(instance, environment);
+            visibleCount++;
         }
-        if (space != null)
-            modelBatch.render(space);
+
         modelBatch.end();
 
         stringBuilder.setLength(0);
@@ -128,14 +116,6 @@ public class Main2 implements ApplicationListener {
         stringBuilder.append(" Visible: ").append(visibleCount);
         label.setText(stringBuilder);
         stage.draw();
-    }
-
-    private Vector3 position = new Vector3();
-
-    protected boolean isVisible(final PerspectiveCamera cam, final GameObject instance) {
-        instance.transform.getTranslation(position);
-        position.add(instance.center);
-        return cam.frustum.sphereInFrustum(position, instance.radius);
     }
 
     @Override
@@ -157,4 +137,19 @@ public class Main2 implements ApplicationListener {
     @Override
     public void resume() {
     }
+
+//    public static class GameObject extends ModelInstance {
+//        private final static BoundingBox bounds = new BoundingBox();
+//        public final Vector3 center = new Vector3();
+//        public final Vector3 dimensions = new Vector3();
+//        public final float radius;
+//
+//        public GameObject(Model model, String rootNode, boolean mergeTransform) {
+//            super(model, rootNode, mergeTransform);
+//            calculateBoundingBox(bounds);
+//            bounds.getCenter(center);
+//            bounds.getDimensions(dimensions);
+//            radius = dimensions.len() / 2f;
+//        }
+//    }
 }
