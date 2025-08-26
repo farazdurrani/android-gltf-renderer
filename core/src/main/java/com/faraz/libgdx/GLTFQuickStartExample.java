@@ -1,4 +1,5 @@
 package com.faraz.libgdx;
+
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
@@ -6,11 +7,9 @@ import com.badlogic.gdx.graphics.Cubemap;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
 
-import net.mgsx.gltf.loaders.glb.GLBLoader;
 import net.mgsx.gltf.loaders.gltf.GLTFLoader;
 import net.mgsx.gltf.scene3d.attributes.PBRCubemapAttribute;
 import net.mgsx.gltf.scene3d.attributes.PBRTextureAttribute;
@@ -39,17 +38,16 @@ public class GLTFQuickStartExample extends ApplicationAdapter
     public void create() {
 
         // create scene
-        sceneAsset = new GLBLoader().load(Gdx.files.internal("/home/faraz/Android/code-workspace/libgdx-tutorial/assets/data" +
-            "/Grinnell_Lake.glb"));
-        Model m = sceneAsset.scene.model;
+        sceneAsset = new GLTFLoader().load(Gdx.files.internal("/home/faraz/Android/code-workspace/libgdx-tutorial/assets/data/BoomBox.gltf"));
         scene = new Scene(sceneAsset.scene);
         sceneManager = new SceneManager();
         sceneManager.addScene(scene);
 
         // setup camera (The BoomBox model is very small so you may need to adapt camera settings for your scene)
-        camera = new PerspectiveCamera(67, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-        camera.near = .01f;
-        camera.far = 300f;
+        camera = new PerspectiveCamera(60f, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        float d = .02f;
+        camera.near = d / 1000f;
+        camera.far = d * 4;
         sceneManager.setCamera(camera);
 
         // setup light
@@ -74,8 +72,8 @@ public class GLTFQuickStartExample extends ApplicationAdapter
         sceneManager.environment.set(PBRCubemapAttribute.createDiffuseEnv(diffuseCubemap));
 
         // setup skybox
-//        skybox = new SceneSkybox(environmentCubemap);
-//        sceneManager.setSkyBox(skybox);
+        skybox = new SceneSkybox(environmentCubemap);
+        sceneManager.setSkyBox(skybox);
     }
 
     @Override
@@ -89,10 +87,9 @@ public class GLTFQuickStartExample extends ApplicationAdapter
         time += deltaTime;
 
         // animate camera
-//        camera.position.setFromSpherical(MathUtils.PI/4, time * .3f).scl(10f);
-        camera.position.set(0f, 1100f, 500f);
+        camera.position.setFromSpherical(MathUtils.PI/4, time * .3f).scl(.02f);
         camera.up.set(Vector3.Y);
-        camera.lookAt(0f, 0f, 0f);
+        camera.lookAt(Vector3.Zero);
         camera.update();
 
         // render
@@ -112,3 +109,4 @@ public class GLTFQuickStartExample extends ApplicationAdapter
         skybox.dispose();
     }
 }
+

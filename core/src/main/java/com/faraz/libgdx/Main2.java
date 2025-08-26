@@ -1,11 +1,16 @@
 package com.faraz.libgdx;
 
+import static com.badlogic.gdx.graphics.GL20.GL_DEPTH_TEST;
+
 import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.GL30;
+import com.badlogic.gdx.graphics.GL31;
+import com.badlogic.gdx.graphics.GL32;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g3d.Environment;
@@ -24,16 +29,18 @@ import net.mgsx.gltf.loaders.gltf.GLTFAssetLoader;
 import net.mgsx.gltf.scene3d.lights.DirectionalLightEx;
 import net.mgsx.gltf.scene3d.scene.SceneAsset;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * See: http://blog.xoppa.com/3d-frustum-culling-with-libgdx
  *
  * @author Xoppa
  */
 public class Main2 implements ApplicationListener {
-    public static final String[] fileExtension = {"glb", "gltf"};
-    public static final String filename = "Grinnell_Lake." + fileExtension[0];
+    public static final String filename = "Grinnell_Lake.glb";
+//    public static final String filename = "BoomBox.gltf";
     private final String data = "/home/faraz/Android/code-workspace/libgdx-tutorial/assets/data/" + filename;
-    private final Vector3 position = new Vector3();
     protected PerspectiveCamera cam;
     protected CameraInputController camController;
     protected ModelBatch modelBatch;
@@ -47,6 +54,8 @@ public class Main2 implements ApplicationListener {
     protected StringBuilder stringBuilder;
     private int visibleCount;
     private DirectionalLightEx light;
+    private static final Vector3 position = new Vector3();
+
 
     @Override
     public void create() {
@@ -65,9 +74,10 @@ public class Main2 implements ApplicationListener {
         environment.add(light);
 
         cam = new PerspectiveCamera(67, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-        cam.position.set(0f, 5100f, 3000f);
+        cam.position.set(0f, 5100f, 3000f); //for grinnel lake
+//        cam.position.set(0f, 20, 20f); //for boombox
         cam.lookAt(0, 0, 0);
-        cam.near = 0.1f;
+        cam.near = 10f;
         cam.far = 30000f;
         cam.update();
 
@@ -98,7 +108,6 @@ public class Main2 implements ApplicationListener {
         return cam.frustum.pointInFrustum(position);
     }
 
-
     @Override
     public void render() {
         if (loading && assets.update()) {
@@ -108,21 +117,22 @@ public class Main2 implements ApplicationListener {
 
         Gdx.gl.glViewport(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
-//        todo experimental
-//        Gdx.gl.glClearColor(0f, 0f, 0f, 1f);
-//        Gdx.gl.glEnable(GL_DEPTH_TEST);
-//        Gdx.gl.glCullFace(GL_CULL_FACE);
 
-//        modelBatch.getRenderContext().setDepthTest(GL20.GL_LEQUAL);
-//        modelBatch.getRenderContext().setCullFace(GL20.GL_BACK);
-//        todo experimental
+/*
+        todo experimental
+        Gdx.gl.glClearColor(0f, 0f, 0f, 1f);
+        Gdx.gl.glEnable(GL_DEPTH_TEST);
+        Gdx.gl.glCullFace(GL_CULL_FACE);
+
+        modelBatch.getRenderContext().setCullFace(GL20.GL_BACK);
+        todo experimental*/
         modelBatch.begin(cam);
         visibleCount = 0;
-        for (final ModelInstance instance : instances) {
-            if (isVisible(cam, instance)) {
-                modelBatch.render(instance, environment);
+        for (int i = 0; i < instances.size; i++) {
+            if (isVisible(cam, instances.get(i))) {
+                modelBatch.render(instances.get(i), environment);
+                visibleCount++;
             }
-            visibleCount++;
         }
 
         modelBatch.end();

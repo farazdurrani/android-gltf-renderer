@@ -12,9 +12,9 @@ public class CustomCameraInputController extends CameraInputController {
     @Override
     public boolean scrolled(float amountX, float amountY) {
         if (amountY > 0) {
-            zoom(-100f);
+            zoom(-50f);
         } else {
-            zoom(100f);
+            zoom(50f);
         }
         return super.scrolled(amountX, amountY);
     }
