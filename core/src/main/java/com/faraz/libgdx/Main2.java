@@ -38,7 +38,7 @@ import java.util.Map;
  * @author Xoppa
  */
 public class Main2 implements ApplicationListener {
-    public static final String filename = "Grinnell_Lake.glb";
+    public static final String filename = "McdonaldsLake.glb";
 //    public static final String filename = "BoomBox.gltf";
     private final String data = "/home/faraz/Android/code-workspace/libgdx-tutorial/assets/data/" + filename;
     protected PerspectiveCamera cam;

@@ -2,6 +2,7 @@ package com.faraz.libgdx.lwjgl3;
 
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
+import com.faraz.libgdx.Basic3DTest;
 import com.faraz.libgdx.GLTFQuickStartExample;
 import com.faraz.libgdx.Main;
 import com.faraz.libgdx.Main2;
@@ -15,7 +16,7 @@ public class Lwjgl3Launcher {
     }
 
     private static Lwjgl3Application createApplication() {
-        return new Lwjgl3Application(new Main2(), getDefaultConfiguration());
+        return new Lwjgl3Application(new Basic3DTest(), getDefaultConfiguration());
     }
 
     private static Lwjgl3ApplicationConfiguration getDefaultConfiguration() {

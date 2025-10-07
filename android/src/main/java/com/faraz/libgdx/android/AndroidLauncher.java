@@ -4,6 +4,7 @@ import android.os.Bundle;
 
 import com.badlogic.gdx.backends.android.AndroidApplication;
 import com.badlogic.gdx.backends.android.AndroidApplicationConfiguration;
+import com.faraz.libgdx.Basic3DTest;
 import com.faraz.libgdx.GLTFQuickStartExample;
 import com.faraz.libgdx.Main;
 import com.faraz.libgdx.Main2;
@@ -16,6 +17,6 @@ public class AndroidLauncher extends AndroidApplication {
         super.onCreate(savedInstanceState);
         AndroidApplicationConfiguration configuration = new AndroidApplicationConfiguration();
         configuration.useImmersiveMode = true; // Recommended, but not required.
-        initialize(new Main2(), configuration);
+        initialize(new Basic3DTest(), configuration);
     }
 }
